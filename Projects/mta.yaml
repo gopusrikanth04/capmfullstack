@@ -1,0 +1,96 @@
+_schema-version: "3.1"
+ID: Projects
+description: A simple CAP project.
+version: 1.0.0
+modules:
+- name: Projects-srv
+  type: nodejs
+  path: gen/srv
+  requires:
+  - name: Projects-db
+  provides:
+  - name: srv-api
+    properties:
+      srv-url: ${default-url}
+  parameters:
+    buildpack: nodejs_buildpack
+  build-parameters:
+    builder: npm
+- name: Projects-db-deployer
+  type: hdb
+  path: db
+  requires:
+  - name: Projects-db
+  parameters:
+    buildpack: nodejs_buildpack
+- name: Projects-app-content
+  type: com.sap.application.content
+  path: .
+  requires:
+  - name: Projects-repo-host
+    parameters:
+      content-target: true
+  build-parameters:
+    build-result: resources
+    requires:
+    - artifacts:
+      - comsripro3project3.zip
+      name: comsripro3project3
+      target-path: resources/
+- name: comsripro3project3
+  type: html5
+  path: app/project3
+  build-parameters:
+    build-result: dist
+    builder: custom
+    commands:
+    - npm install
+    - npm run build:cf
+    supported-platforms: []
+resources:
+- name: Projects-db
+  type: com.sap.xs.hdi-container
+  parameters:
+    service: hana
+    service-plan: hdi-shared
+- name: Projects-repo-host
+  type: org.cloudfoundry.managed-service
+  parameters:
+    service: html5-apps-repo
+    service-name: Projects-html5-srv
+    service-plan: app-host
+- name: Projects-destination-service
+  type: org.cloudfoundry.managed-service
+  parameters:
+    config:
+      HTML5Runtime_enabled: false
+      init_data:
+        instance:
+          destinations:
+          - Authentication: NoAuthentication
+            Name: ui5
+            ProxyType: Internet
+            Type: HTTP
+            URL: https://ui5.sap.com
+          - Authentication: NoAuthentication
+            HTML5.DynamicDestination: true
+            HTML5.ForwardAuthToken: true
+            Name: Projects-srv-api
+            ProxyType: Internet
+            Type: HTTP
+            URL: ~{srv-api/srv-url}
+          existing_destinations_policy: update
+      version: 1.0.0
+    service: destination
+    service-name: Projects-destination-service
+    service-plan: lite
+  requires:
+  - name: srv-api
+parameters:
+  deploy_mode: html5-repo
+  enable-parallel-deployments: true
+build-parameters:
+  before-all:
+  - builder: custom
+    commands:
+    - npx cds build --production
