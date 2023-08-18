@@ -4,6 +4,8 @@ service ProjectService {
 
  entity Projects as projection on my.Projects;
 
+ entity Projects2 as projection on my.Projects2;
+
 //    entity Projects as projection on my.Projects
 //    actions{
 //        function getOrders1() returns String
