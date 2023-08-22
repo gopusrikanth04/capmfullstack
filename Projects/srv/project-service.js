@@ -7,9 +7,9 @@ module.exports = function (srv) {
         }
     });
 
-    
 
-        srv.on('READ', 'Projects', (each) => {
+
+    srv.on('READ', 'Projects', (each) => {
         if (each.id) {
             each.status = 'Active';
         }
