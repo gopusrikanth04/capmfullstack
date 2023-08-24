@@ -17,10 +17,6 @@
     }
   ],
   "oauth2-configuration": {
-    "credential-types": [
-      "binding-secret",
-      "x509"
-    ],
     "redirect-uris": [
       "https://*cfapps.us10-001.hana.ondemand.com/login/callback*",
       "https://port5000*/login/callback*"
